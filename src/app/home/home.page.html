@@ -68,9 +68,10 @@
                   @for (face of diamondFaces; track face.title) {
                     @if (face.route) {
                       <a
-                        class="diamond-face"
+                        class="cube-face"
                         [ngClass]="face.className"
                         [routerLink]="face.route"
+                        [attr.aria-label]="face.title"
                       >
                         <ion-icon [name]="face.icon"></ion-icon>
                         <strong>{{ face.title }}</strong>
@@ -78,11 +79,12 @@
                       </a>
                     } @else {
                       <a
-                        class="diamond-face"
+                        class="cube-face"
                         [ngClass]="face.className"
                         [href]="face.href"
                         target="_blank"
                         rel="noreferrer"
+                        [attr.aria-label]="face.title"
                       >
                         <ion-icon [name]="face.icon"></ion-icon>
                         <strong>{{ face.title }}</strong>
@@ -90,12 +92,9 @@
                       </a>
                     }
                   }
-                  <div class="diamond-center">
-                    <span>Portafolio</span>
-                  </div>
                 </div>
               </div>
-              <p>Arrastra el cubo 3D y entra a cada cara del portafolio.</p>
+              <p>Arrastra el cubo 3D y abre cada seccion desde sus caras.</p>
             </section>
           </div>
         </section>

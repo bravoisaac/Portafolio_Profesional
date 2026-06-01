@@ -7,10 +7,34 @@
       </a>
 
       <div class="nav-links">
-        <a routerLink="/perfil" [class.active]="currentScreen === 'profile'">Perfil</a>
-        <a routerLink="/proyectos" [class.active]="currentScreen === 'projects'">Proyectos</a>
-        <a routerLink="/github" [class.active]="currentScreen === 'github'">GitHub</a>
-        <a routerLink="/contacto" [class.active]="currentScreen === 'contact'">Contacto</a>
+        <a routerLink="/home" [class.active]="currentScreen === 'home'">
+          <ion-icon name="home-outline" aria-hidden="true"></ion-icon>
+          <span>Inicio</span>
+        </a>
+        <a routerLink="/perfil" [class.active]="currentScreen === 'profile'">
+          <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
+          <span>Perfil</span>
+        </a>
+        <a routerLink="/stack" [class.active]="currentScreen === 'stack'">
+          <ion-icon name="layers-outline" aria-hidden="true"></ion-icon>
+          <span>Stack</span>
+        </a>
+        <a routerLink="/experiencia" [class.active]="currentScreen === 'experience'">
+          <ion-icon name="ribbon-outline" aria-hidden="true"></ion-icon>
+          <span>Experiencia</span>
+        </a>
+        <a routerLink="/proyectos" [class.active]="currentScreen === 'projects'">
+          <ion-icon name="briefcase-outline" aria-hidden="true"></ion-icon>
+          <span>Proyectos</span>
+        </a>
+        <a routerLink="/github" [class.active]="currentScreen === 'github'">
+          <ion-icon name="logo-github" aria-hidden="true"></ion-icon>
+          <span>GitHub</span>
+        </a>
+        <a routerLink="/contacto" [class.active]="currentScreen === 'contact'">
+          <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+          <span>Contacto</span>
+        </a>
       </div>
     </nav>
 
@@ -61,40 +85,49 @@
                 (pointerdown)="startDiamondRotation($event)"
                 (pointermove)="rotateDiamond($event)"
                 (pointerup)="stopDiamondRotation()"
+                (pointercancel)="stopDiamondRotation($event)"
                 (pointerleave)="stopDiamondRotation()"
+                (lostpointercapture)="stopDiamondRotation()"
               >
                 <div class="diamond-aura"></div>
                 <div class="diamond-core">
                   @for (face of diamondFaces; track face.title) {
                     @if (face.route) {
                       <a
-                        class="cube-face"
+                        class="triangle nav-triangle"
                         [ngClass]="face.className"
-                        [routerLink]="face.route"
+                        [href]="face.route"
                         [attr.aria-label]="face.title"
+                        [attr.data-label]="face.title"
+                        (click)="handleDiamondFaceClick($event, face)"
                       >
-                        <ion-icon [name]="face.icon"></ion-icon>
-                        <strong>{{ face.title }}</strong>
-                        <span>{{ face.subtitle }}</span>
+                        <span class="face-content">
+                          <ion-icon [name]="face.icon" aria-hidden="true"></ion-icon>
+                          <span>{{ face.title }}</span>
+                        </span>
                       </a>
                     } @else {
                       <a
-                        class="cube-face"
+                        class="triangle nav-triangle"
                         [ngClass]="face.className"
                         [href]="face.href"
                         target="_blank"
                         rel="noreferrer"
                         [attr.aria-label]="face.title"
+                        [attr.data-label]="face.title"
+                        (click)="handleDiamondFaceClick($event, face)"
                       >
-                        <ion-icon [name]="face.icon"></ion-icon>
-                        <strong>{{ face.title }}</strong>
-                        <span>{{ face.subtitle }}</span>
+                        <span class="face-content">
+                          <ion-icon [name]="face.icon" aria-hidden="true"></ion-icon>
+                          <span>{{ face.title }}</span>
+                        </span>
                       </a>
                     }
                   }
                 </div>
+                <div class="diamond-base"></div>
               </div>
-              <p>Arrastra el cubo 3D y abre cada seccion desde sus caras.</p>
+              <p>Arrastra el diamante 3D y abre cada seccion desde sus caras.</p>
             </section>
           </div>
         </section>
@@ -182,6 +215,106 @@
             </section>
 
             <aside class="credential-panel">
+              <h3>Formacion academica</h3>
+              <ul>
+                @for (item of education; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+              <h3>Certificaciones</h3>
+              <ul>
+                @for (item of certifications; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </aside>
+          </div>
+        </section>
+      }
+
+      @case ('stack') {
+        <section class="section screen stack-screen">
+          <div class="section-heading premium-heading">
+            <p class="eyebrow">Stack tecnico</p>
+            <h2>Tecnologias organizadas por valor de producto.</h2>
+            <p>
+              Un resumen claro del stack que uso para construir aplicaciones web,
+              automatizar procesos, trabajar con datos y desplegar soluciones con
+              base profesional.
+            </p>
+          </div>
+
+          <div class="stack-focus-grid">
+            @for (focus of stackFocus; track focus.title) {
+              <article class="stack-focus-card">
+                <ion-icon [name]="focus.icon"></ion-icon>
+                <h3>{{ focus.title }}</h3>
+                <p>{{ focus.description }}</p>
+                <div class="skill-list">
+                  @for (item of focus.items; track item) {
+                    <span>{{ item }}</span>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+
+          <div class="tech-matrix elevated-matrix">
+            @for (group of techGroups; track group.title) {
+              <article class="tech-card">
+                <h3>{{ group.title }}</h3>
+                <div class="skill-list">
+                  @for (item of group.items; track item) {
+                    <span>{{ item }}</span>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+
+      @case ('experience') {
+        <section class="section screen experience-screen">
+          <div class="section-heading premium-heading">
+            <p class="eyebrow">Experiencia y certificaciones</p>
+            <h2>Trayectoria aplicada en soporte, desarrollo y automatizacion.</h2>
+            <p>
+              Experiencia en contextos institucionales, con foco en continuidad
+              operativa, optimizacion de procesos, soporte a usuarios y mejora de
+              sistemas internos.
+            </p>
+          </div>
+
+          <div class="metric-strip" aria-label="Indicadores de experiencia">
+            @for (metric of experienceMetrics; track metric.label) {
+              <article>
+                <strong>{{ metric.value }}</strong>
+                <span>{{ metric.label }}</span>
+              </article>
+            }
+          </div>
+
+          <div class="timeline-grid experience-detail-grid">
+            <section class="timeline-panel">
+              @for (item of experience; track item.role) {
+                <article class="timeline-item">
+                  <div>
+                    <span>{{ item.period }}</span>
+                    <h3>{{ item.role }}</h3>
+                    <p>{{ item.organization }}</p>
+                  </div>
+                  <ul>
+                    @for (highlight of item.highlights; track highlight) {
+                      <li>{{ highlight }}</li>
+                    }
+                  </ul>
+                </article>
+              }
+            </section>
+
+            <aside class="credential-panel credential-feature">
+              <ion-icon name="ribbon-outline"></ion-icon>
               <h3>Formacion academica</h3>
               <ul>
                 @for (item of education; track item) {

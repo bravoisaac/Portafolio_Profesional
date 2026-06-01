@@ -1,7 +1,7 @@
 import { NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   IonButton,
   IonContent,
@@ -9,13 +9,25 @@ import {
 } from '@ionic/angular/standalone';
 import {
   arrowForwardOutline,
+  analyticsOutline,
   briefcaseOutline,
   callOutline,
+  chatbubbleEllipsesOutline,
   codeSlashOutline,
+  compassOutline,
+  cubeOutline,
+  documentTextOutline,
+  folderOpenOutline,
+  homeOutline,
+  layersOutline,
   logoGithub,
   mailOutline,
   openOutline,
+  personCircleOutline,
   personOutline,
+  ribbonOutline,
+  serverOutline,
+  trophyOutline,
 } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 
@@ -65,6 +77,13 @@ interface FeaturedCase {
   repository: string;
 }
 
+interface StackFocus {
+  title: string;
+  icon: string;
+  description: string;
+  items: string[];
+}
+
 interface DiamondFace {
   title: string;
   subtitle: string;
@@ -74,7 +93,14 @@ interface DiamondFace {
   className: string;
 }
 
-type PortfolioScreen = 'home' | 'profile' | 'projects' | 'github' | 'contact';
+type PortfolioScreen =
+  | 'home'
+  | 'profile'
+  | 'stack'
+  | 'experience'
+  | 'projects'
+  | 'github'
+  | 'contact';
 
 @Component({
   selector: 'app-home',
@@ -89,13 +115,17 @@ export class HomePage implements OnInit {
   private readonly emailPublicKey = 'nG1ofkK0Ahmk5oNh5';
 
   currentScreen: PortfolioScreen = 'home';
-  diamondRotateX = -10;
-  diamondRotateY = -18;
+  diamondRotateX = -14;
+  diamondRotateY = -28;
   private isRotatingDiamond = false;
   private diamondStartX = 0;
   private diamondStartY = 0;
   private diamondStartRotateX = 0;
   private diamondStartRotateY = 0;
+  private diamondTargetRotateX = -14;
+  private diamondTargetRotateY = -28;
+  private diamondAnimationFrame = 0;
+  private diamondDidDrag = false;
 
   readonly skills = [
     'Python',
@@ -136,6 +166,30 @@ export class HomePage implements OnInit {
     {
       title: 'Automatizacion y gestion',
       items: ['Power Automate', 'Git', 'GitHub', 'Scrum', 'Kanban'],
+    },
+  ];
+
+  readonly stackFocus: StackFocus[] = [
+    {
+      title: 'Backend y APIs',
+      icon: 'server-outline',
+      description:
+        'Construccion de servicios, endpoints REST y logica de negocio para aplicaciones internas y productos web.',
+      items: ['Laravel', 'Flask', 'Node.js', 'Express', 'APIs REST', 'Postman'],
+    },
+    {
+      title: 'Frontend y mobile',
+      icon: 'layers-outline',
+      description:
+        'Interfaces responsive con Angular e Ionic, enfocadas en navegacion clara, componentes reutilizables y experiencia de usuario.',
+      items: ['Angular', 'Ionic', 'TypeScript', 'HTML5', 'CSS3', 'Responsive UI'],
+    },
+    {
+      title: 'Datos y automatizacion',
+      icon: 'analytics-outline',
+      description:
+        'Optimizacion de consultas, reporteria y flujos automatizados para reducir tareas manuales y mejorar trazabilidad.',
+      items: ['MySQL', 'Power BI', 'Power Automate', 'Python', 'Excel Avanzado', 'AWS'],
     },
   ];
 
@@ -194,26 +248,46 @@ export class HomePage implements OnInit {
     'Fundamentals of Analytics on AWS Part 1 & 2 - Amazon Web Services',
   ];
 
+  readonly experienceMetrics = [
+    { value: '2024-2025', label: 'Desarrollo y soporte TI en JUNJI' },
+    { value: '100+', label: 'usuarios atendidos en mesa de ayuda' },
+    { value: '20k+', label: 'registros trabajados en MySQL' },
+  ];
+
   readonly diamondFaces: DiamondFace[] = [
     {
       title: 'Inicio',
       subtitle: 'Resumen profesional',
       route: '/home',
-      icon: 'code-slash-outline',
+      icon: 'compass-outline',
       className: 'face-home',
     },
     {
       title: 'Perfil',
       subtitle: 'Stack y experiencia',
       route: '/perfil',
-      icon: 'person-outline',
+      icon: 'person-circle-outline',
       className: 'face-profile',
+    },
+    {
+      title: 'Stack',
+      subtitle: 'Tecnologias',
+      route: '/stack',
+      icon: 'cube-outline',
+      className: 'face-stack',
+    },
+    {
+      title: 'Experiencia',
+      subtitle: 'Trayectoria',
+      route: '/experiencia',
+      icon: 'trophy-outline',
+      className: 'face-experience',
     },
     {
       title: 'Proyectos',
       subtitle: 'GitHub y casos reales',
       route: '/proyectos',
-      icon: 'briefcase-outline',
+      icon: 'folder-open-outline',
       className: 'face-projects',
     },
     {
@@ -227,14 +301,14 @@ export class HomePage implements OnInit {
       title: 'Contacto',
       subtitle: 'Trabajemos juntos',
       route: '/contacto',
-      icon: 'mail-outline',
+      icon: 'chatbubble-ellipses-outline',
       className: 'face-contact',
     },
     {
       title: 'CV',
       subtitle: 'Descargar perfil',
       href: 'assets/CV_Isaac_Bravo_FullStack.pdf',
-      icon: 'open-outline',
+      icon: 'document-text-outline',
       className: 'face-cv',
     },
   ];
@@ -258,16 +332,31 @@ export class HomePage implements OnInit {
     { value: 'AWS', label: 'cloud practitioner' },
   ];
 
-  constructor(private readonly route: ActivatedRoute) {
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+  ) {
     addIcons({
       arrowForwardOutline,
+      analyticsOutline,
       briefcaseOutline,
       callOutline,
+      chatbubbleEllipsesOutline,
       codeSlashOutline,
+      compassOutline,
+      cubeOutline,
+      documentTextOutline,
+      folderOpenOutline,
+      homeOutline,
+      layersOutline,
       logoGithub,
       mailOutline,
       openOutline,
+      personCircleOutline,
       personOutline,
+      ribbonOutline,
+      serverOutline,
+      trophyOutline,
     });
   }
 
@@ -292,11 +381,21 @@ export class HomePage implements OnInit {
   }
 
   startDiamondRotation(event: PointerEvent): void {
+    const stage = event.currentTarget as HTMLElement;
+    const startedOnFace =
+      event.target instanceof Element && Boolean(event.target.closest('.nav-triangle'));
+
+    if (!startedOnFace) {
+      stage.setPointerCapture(event.pointerId);
+    }
+
     this.isRotatingDiamond = true;
+    this.diamondDidDrag = false;
     this.diamondStartX = event.clientX;
     this.diamondStartY = event.clientY;
-    this.diamondStartRotateX = this.diamondRotateX;
-    this.diamondStartRotateY = this.diamondRotateY;
+    this.diamondStartRotateX = this.diamondTargetRotateX;
+    this.diamondStartRotateY = this.diamondTargetRotateY;
+    this.animateDiamondRotation();
   }
 
   rotateDiamond(event: PointerEvent): void {
@@ -307,15 +406,69 @@ export class HomePage implements OnInit {
     const deltaX = event.clientX - this.diamondStartX;
     const deltaY = event.clientY - this.diamondStartY;
 
-    this.diamondRotateY = this.diamondStartRotateY + deltaX * 0.35;
-    this.diamondRotateX = Math.max(
+    if (Math.hypot(deltaX, deltaY) > 7) {
+      this.diamondDidDrag = true;
+    }
+
+    this.diamondTargetRotateY = this.diamondStartRotateY + deltaX * 0.22;
+    this.diamondTargetRotateX = Math.max(
       -42,
-      Math.min(42, this.diamondStartRotateX - deltaY * 0.28),
+      Math.min(42, this.diamondStartRotateX - deltaY * 0.18),
     );
   }
 
-  stopDiamondRotation(): void {
+  stopDiamondRotation(event?: PointerEvent): void {
+    if (event?.currentTarget) {
+      const target = event.currentTarget as HTMLElement;
+      if (target.hasPointerCapture(event.pointerId)) {
+        target.releasePointerCapture(event.pointerId);
+      }
+    }
+
     this.isRotatingDiamond = false;
+  }
+
+  handleDiamondFaceClick(event: MouseEvent, face: DiamondFace): void {
+    event.preventDefault();
+
+    if (this.diamondDidDrag) {
+      event.stopPropagation();
+      this.diamondDidDrag = false;
+      return;
+    }
+
+    if (face.route) {
+      void this.router.navigateByUrl(face.route);
+      return;
+    }
+
+    if (face.href) {
+      window.open(face.href, '_blank', 'noreferrer');
+    }
+  }
+
+  private animateDiamondRotation(): void {
+    if (this.diamondAnimationFrame) {
+      return;
+    }
+
+    const step = () => {
+      const easing = this.isRotatingDiamond ? 0.18 : 0.1;
+
+      this.diamondRotateX += (this.diamondTargetRotateX - this.diamondRotateX) * easing;
+      this.diamondRotateY += (this.diamondTargetRotateY - this.diamondRotateY) * easing;
+
+      const deltaX = Math.abs(this.diamondTargetRotateX - this.diamondRotateX);
+      const deltaY = Math.abs(this.diamondTargetRotateY - this.diamondRotateY);
+
+      if (this.isRotatingDiamond || deltaX > 0.02 || deltaY > 0.02) {
+        this.diamondAnimationFrame = requestAnimationFrame(step);
+      } else {
+        this.diamondAnimationFrame = 0;
+      }
+    };
+
+    this.diamondAnimationFrame = requestAnimationFrame(step);
   }
 
   async sendContactMessage(): Promise<void> {

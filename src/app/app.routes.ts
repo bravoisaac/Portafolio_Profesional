@@ -12,6 +12,16 @@ export const routes: Routes = [
     data: { screen: 'profile' },
   },
   {
+    path: 'stack',
+    loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
+    data: { screen: 'stack' },
+  },
+  {
+    path: 'experiencia',
+    loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
+    data: { screen: 'experience' },
+  },
+  {
     path: 'proyectos',
     loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
     data: { screen: 'projects' },
